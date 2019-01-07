@@ -4,9 +4,6 @@ import re
 import pandas as pd
 import csv
 
-songs = pd.read_csv("/Users/vishalpatel/Documents/Coding/flatiron/Blog 2/songs.csv")
-
-
 def scrape_album_songs(artist, album):
 
     url = f'https://genius.com/albums/{artist}/{album}'
@@ -18,20 +15,33 @@ def scrape_album_songs(artist, album):
     song_names = [song.text for song in song_names]
     song_names = [(clean_song_name(song)) for song in song_names]
     songs = list(zip(song_names, song_urls))
-    songs = [(artist, song[0], song[1]) for song in songs]
+    songs = [(artist, song[0][0], song[0][1], song[1]) for song in songs]
+
     return songs
 
 def clean_song_name(song):
+    features = None
     regex_first = re.compile('^(\n)( )*')
     regex_second = re.compile('(\n)( )*(Lyrics)(\n)*')
     regex_third = re.compile('(\(Ft.*)')
+    feature_match = re.search(regex_third, song)
+    if feature_match:
+        features = feature_match.group(0)
+        features = features.replace('Ft.','')
+        features = features.replace('&', ',')
+        features = features.replace(')','')
+        features = features.replace('(','')
+        features = features.split(',')
+        features = [feature.replace('\xa0', ' ') for feature in features]
+        features = [feature.strip() for feature in features]
+
     song = re.sub(regex_first, '', song)
     song = re.sub(regex_second, '', song)
     song = re.sub(regex_third, '', song)
     song = song.rstrip()
-    return song
+    return (song, features)
 
-def scrape_lyrics_to_csv(artist, song_name, url):
+def scrape_lyrics_to_csv(artist, song_name, features, url):
     req = requests.get(url)
     html = BeautifulSoup(req.content, 'html.parser')
     all_text = html.find('div', {'class': 'lyrics'}).text
@@ -40,7 +50,7 @@ def scrape_lyrics_to_csv(artist, song_name, url):
     lyrics = [line  for line in lines if len(line)> 0 and not regex.search(line)]
 
     lyrics_str = ' '.join(lyrics)
-    row = [[artist, song_name, lyrics_str]]
+    row = [[artist, song_name, lyrics_str, features]]
     with open('lyrics.csv', 'a') as writeFile:
         writer = csv.writer(writeFile)
         writer.writerows(row)
@@ -53,4 +63,4 @@ def scrape_all(list_of_artists_albums):
         album = album.replace(' ', '-')
         songs = scrape_album_songs(artist, album)
         for song in songs:
-            scrape_lyrics_to_csv(song[0], song[1], song[2])
+            scrape_lyrics_to_csv(song[0], song[1], song[2], song[3])
