@@ -2,18 +2,11 @@ import config
 import requests
 import pandas as pd
 
-songs = pd.read_csv('lyrics.csv')
+# songs = pd.read_csv('lyrics.csv')
 
-songs['danceability'] = 'NaN'
-songs['energy'] = 'NaN'
-songs['loudness'] = 'NaN'
-songs['speechiness'] = 'NaN'
-songs['liveness'] = 'NaN'
-songs['tempo'] = 'NaN'
-songs['valence']= 'NaN'
-songs['isrc'] = 'NaN'
 
-spotifyapi = config.spotify_api
+# spotifyapi = config.spotify_api
+spotifyapi = 'Bearer BQDS-AwWxW6ZbawlrBZgd5fcpiEz3vRQtFRWQkJnkgOXiHywUH5REvrjO_6xf0LPfGojkv7JATy4gqW3_BFTWX-s-psHM887ObzHPT3A69U5zivZgf1viQkCpVsaatZ6AZB4nP786xE0EXYFnfWz'
 
 def get_spotify_track_id(artist, song):
     artist = artist.lower()
@@ -25,6 +18,7 @@ def get_spotify_track_id(artist, song):
                 "Accept": "application/json", "Content-Type": "application/json"}
     req = requests.get(url, headers=headers)
     id = req.json()['tracks']['items'][0]['id']
+    print(song, id)
     return id
 
 def get_spotify_track_info(id):
@@ -35,12 +29,16 @@ def get_spotify_track_info(id):
     req = requests.get(url, headers=headers)
     req_info = requests.get(url_info, headers=headers)
     isrc = req_info.json()['external_ids']['isrc']
+    date = req_info.json()['album']['release_date']
+    all_artists = req_info.json()['artists']
+    featured_artists = [artist['name'] for artist in all_artists[1:]]
     json = req.json()
     json['isrc'] = isrc
-
+    json['release_date'] = date
+    json['featured'] = featured_artists
     return(json)
 
-def add_spotify_to_df():
+def add_spotify_to_df(songs):
     for idx, row in songs.iterrows():
         url = f'https://api.spotify.com/v1/audio-features/7yNK27ZTpHew0c55VvIJgm'
         headers = {"Authorization": f'{spotifyapi}',
@@ -57,14 +55,16 @@ def add_spotify_to_df():
                 id = 'failed'
             if id != 'failed':
                 info = get_spotify_track_info(id)
-                row['danceability'] = info['danceability']
-                row['energy'] = info['energy']
-                row['loudness'] = info['loudness']
-                row['speechiness'] = info['speechiness']
-                row['liveness'] = info['liveness']
-                row['tempo'] = info['tempo']
-                row['valence']= info['valence']
-                row['isrc'] = info['isrc']
+                songs.loc[idx, 'danceability'] = info['danceability']
+                songs.loc[idx, 'energy'] = info['energy']
+                songs.loc[idx, 'loudness'] = info['loudness']
+                songs.loc[idx, 'speechiness'] = info['speechiness']
+                songs.loc[idx, 'liveness'] = info['liveness']
+                songs.loc[idx, 'tempo'] = info['tempo']
+                songs.loc[idx, 'valence']= info['valence']
+                songs.loc[idx, 'isrc'] = info['isrc']
+                songs.loc[idx, 'release_date'] = info['release_date']
+
             else:
                 row['danceability'] = None
                 row['energy'] = None
@@ -74,3 +74,6 @@ def add_spotify_to_df():
                 row['tempo'] = None
                 row['valence']= None
                 row['isrc'] = None
+                row['realease_date'] = None
+                print('failed')
+    return songs
