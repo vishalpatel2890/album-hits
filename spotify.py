@@ -6,7 +6,7 @@ import pandas as pd
 
 
 # spotifyapi = config.spotify_api
-spotifyapi = 'Bearer BQAiZZWB4TYwfTHgFlolqUVo2FkhIJAH22hz2QXd9lJwMlsbh5Rq5r_0-RmlOBgmA1A3S-avnKv76P0NagMxRtXEFxDmyl31g9a49O8WfAGqvkFuauptGcT2gpzR7ih43Vmab9swpVbuTcrdfaKY'
+spotifyapi = 'Bearer BQDS-AwWxW6ZbawlrBZgd5fcpiEz3vRQtFRWQkJnkgOXiHywUH5REvrjO_6xf0LPfGojkv7JATy4gqW3_BFTWX-s-psHM887ObzHPT3A69U5zivZgf1viQkCpVsaatZ6AZB4nP786xE0EXYFnfWz'
 
 def get_spotify_track_id(artist, song):
     artist = artist.lower()
@@ -55,16 +55,16 @@ def add_spotify_to_df(songs):
                 id = 'failed'
             if id != 'failed':
                 info = get_spotify_track_info(id)
-                row['danceability'] = info['danceability']
-                row['energy'] = info['energy']
-                row['loudness'] = info['loudness']
-                row['speechiness'] = info['speechiness']
-                row['liveness'] = info['liveness']
-                row['tempo'] = info['tempo']
-                row['valence']= info['valence']
-                row['isrc'] = info['isrc']
-                row['release_date'] = info['release_date']
-                print(row)
+                songs.loc[idx, 'danceability'] = info['danceability']
+                songs.loc[idx, 'energy'] = info['energy']
+                songs.loc[idx, 'loudness'] = info['loudness']
+                songs.loc[idx, 'speechiness'] = info['speechiness']
+                songs.loc[idx, 'liveness'] = info['liveness']
+                songs.loc[idx, 'tempo'] = info['tempo']
+                songs.loc[idx, 'valence']= info['valence']
+                songs.loc[idx, 'isrc'] = info['isrc']
+                songs.loc[idx, 'release_date'] = info['release_date']
+
             else:
                 row['danceability'] = None
                 row['energy'] = None
