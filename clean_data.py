@@ -6,9 +6,9 @@ import datetime
 from datetime import date
 import re
 
-spotify_lyrics = pd.read_csv('./lyricspotify.csv')
-missed = pd.read_csv('./lastfmmissed.csv')
-lastfm = pd.read_csv('./lastfm.csv')
+spotify_lyrics = pd.read_csv('./data/lyricspotify.csv')
+missed = pd.read_csv('./data/lastfmmissed.csv')
+lastfm = pd.read_csv('./data/lastfm.csv')
 
 #remove extra columns
 missed = missed[missed.columns[-8:]]
@@ -16,8 +16,10 @@ missed = missed[missed.columns[-8:]]
 
 lastfm = lastfm[lastfm.columns[1:]]
 last_fm_total = pd.concat([lastfm,missed])
+
 #rename track-title to song for easy merging
 last_fm_total = last_fm_total.rename(columns={'track-title':'song'})
+
 #reformat artist name for merging
 last_fm_total['artist'] = last_fm_total['artist'].apply(lambda x: x.lower())
 last_fm_total['artist'] = last_fm_total['artist'].apply(lambda x: x.replace(' ', '-'))
@@ -51,35 +53,35 @@ def count_unique_words(lyrics):
 for idx, row in final.iterrows():
   final.loc[idx, 'unique-words'] = count_unique_words(row['lyrics'])
 
-#GET RID OF NULL DATES
-final = final[final.release_date.notnull()]
-for idx, row in final.iterrows():
-    final['today']=datetime.datetime.today().strftime('%Y-%m-%d')
-#calculate age of single
-final['age']=np.nan
-for idx, row in final.iterrows():
-    date=None
-    today=None
-    try:
-        date = datetime.datetime.strptime(final.loc[idx,'release_date'],"%Y-%m-%d")
-        today = datetime.datetime.strptime(final.loc[idx,'today'],"%Y-%m-%d")
-        final.loc[idx,'age']=abs((today-date).days)
-    except:
-        pass
-#calculate listeners/day
-final['list_day']=np.nan
-for idx,row in final.iterrows():
-    days=None
-    listnr=None
-    days=final.loc[idx,'age']
-    listnr=final.loc[idx, 'listeners']
-    final.loc[idx,'list_day']=listnr/days
+# #GET RID OF NULL DATES
+# final = final[final.release_date.notnull()]
+# for idx, row in final.iterrows():
+#     final['today']=datetime.datetime.today().strftime('%Y-%m-%d')
+# #calculate age of single
+# final['age']=np.nan
+# for idx, row in final.iterrows():
+#     date=None
+#     today=None
+#     try:
+#         date = datetime.datetime.strptime(final.loc[idx,'release_date'],"%Y-%m-%d")
+#         today = datetime.datetime.strptime(final.loc[idx,'today'],"%Y-%m-%d")
+#         final.loc[idx,'age']=abs((today-date).days)
+#     except:
+#         pass
+# #calculate listeners/day
+# final['list_day']=np.nan
+# for idx,row in final.iterrows():
+#     days=None
+#     listnr=None
+#     days=final.loc[idx,'age']
+#     listnr=final.loc[idx, 'listeners']
+#     final.loc[idx,'list_day']=listnr/days
 
 #drop rows with null ages
-final = final[~final['age'].isna()]
+# final = final[~final['age'].isna()]
 
 feature_nums = final.drop(columns=['Unnamed: 0', 'artist', 'album', 'song','features',
-                                   'lyrics', 'isrc', 'release_date', 'age',
-                                   'single_release', 'is_hit', 'today', 'listeners', 'playcount', 'list_day', 'playcount_percentage'])
+                                   'lyrics', 'isrc', 'release_date',
+                                   'single_release', 'is_hit', 'listeners', 'playcount', 'playcount_percentage'])
 
 target = final['is_hit']

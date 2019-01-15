@@ -1,4 +1,4 @@
-import config
+# import config
 import requests
 import pandas as pd
 
@@ -40,12 +40,14 @@ def get_spotify_track_info(id):
 
 def add_spotify_to_df(songs):
     for idx, row in songs.iterrows():
+        #test if api is not expired
         url = f'https://api.spotify.com/v1/audio-features/7yNK27ZTpHew0c55VvIJgm'
         headers = {"Authorization": f'{spotifyapi}',
                     "Accept": "application/json", "Content-Type": "application/json"}
         req = requests.get(url, headers=headers)
         try:
             req.json()['error']['status'] == 401
+            #if expired
             print( 'Token Expired')
             break
         except:
@@ -75,5 +77,6 @@ def add_spotify_to_df(songs):
                 row['valence']= None
                 row['isrc'] = None
                 row['realease_date'] = None
+                print(row['song'])
                 print('failed')
     return songs
