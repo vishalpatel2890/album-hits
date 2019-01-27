@@ -1,3 +1,4 @@
+# file to mearge all data sets and create new features
 import pandas as pd
 import numpy as np
 from nltk.corpus import stopwords
@@ -8,7 +9,7 @@ import re
 from zopfli.zlib import compress
 from zlib import decompress
 
-spotify_lyrics = pd.read_csv('https://raw.githubusercontent.com/vishalpatel2890/album-hits/master/data/lyricspotify.csv')
+spotify_lyrics = pd.read_csv('./data/lyrics_spotify.csv')
 missed = pd.read_csv('./data/lastfmmissed.csv')
 lastfm = pd.read_csv('./data/lastfm.csv')
 
