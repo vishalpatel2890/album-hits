@@ -5,8 +5,10 @@ from nltk.tokenize import word_tokenize
 import datetime
 from datetime import date
 import re
+from zopfli.zlib import compress
+from zlib import decompress
 
-spotify_lyrics = pd.read_csv('./data/lyricspotify.csv')
+spotify_lyrics = pd.read_csv('https://raw.githubusercontent.com/vishalpatel2890/album-hits/master/data/lyricspotify.csv')
 missed = pd.read_csv('./data/lastfmmissed.csv')
 lastfm = pd.read_csv('./data/lastfm.csv')
 
@@ -53,6 +55,15 @@ def count_unique_words(lyrics):
 for idx, row in final.iterrows():
   final.loc[idx, 'unique-words'] = count_unique_words(row['lyrics'])
 
+#function calculates how much a song is compressed - 0 - least compressed 1 - most compreseed
+def zopfli_compress(lyrics):
+    return 1-len(compress(lyrics))/len(lyrics)
+
+#add song repetetivness column
+for idx, row in final.iterrows():
+  final.loc[idx, 'repetetivness'] = zopfli_compress(row['lyrics'])
+
+
 # #GET RID OF NULL DATES
 # final = final[final.release_date.notnull()]
 # for idx, row in final.iterrows():
@@ -82,6 +93,16 @@ for idx, row in final.iterrows():
 
 feature_nums = final.drop(columns=['Unnamed: 0', 'artist', 'album', 'song','features',
                                    'lyrics', 'isrc', 'release_date',
-                                   'single_release', 'is_hit', 'listeners', 'playcount', 'playcount_percentage'])
+                                   'single_release', 'is_hit', 'listeners', 'playcount', 'unique-words', 'track_no', 'playcount_percentage'])
 
 target = final['is_hit']
+
+#drop columns with a lot of correlation
+ #Creating a correlation matrix
+corr_matrix = feature_nums.corr().abs()
+
+upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape),k=1).astype(np.bool))
+
+#Creating a list of columns to drop with correlation > .95
+to_drop = [column for column in upper.columns if any(upper[column]>0.95)]
+feature_nums = feature_nums.drop(columns=to_drop)
