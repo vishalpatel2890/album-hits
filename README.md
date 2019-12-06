@@ -1,4 +1,4 @@
-# Classifying Songs as a Hit
+# Classifying Songs as a Hit 
 
 ### Motivation
 Imagine you are a music producer with  a new album on your desk and a tight budget to market it. What songs should you put your limited dollars behind to promote as the "hit" songs? What songs are people going to find catchy enough to encourage them to buy the entire album? We wanted to create a model that could help identify which song(s) on a given album that would be the "hit(s)". 
