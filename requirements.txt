@@ -5,7 +5,7 @@ decorator==4.4.0
 imbalanced-learn==0.4.3
 imblearn==0.0
 ipykernel==5.1.0
-ipython==7.5.0
+ipython==7.16.3
 ipython-genutils==0.2.0
 jedi==0.13.3
 jupyter-client==5.2.4
